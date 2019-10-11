@@ -6,5 +6,4 @@ La siguiente aplicación permite hacer un failover entre dos canales, para tener
 
 Vaya a la página para ingresar los datos y copiar el código resultante.
 
-[https://jsalonl.github.io/FailOver_Mikrotik/index.html](https://jsalonl.github.io/FailOver_Mikrotik/index.html)
-
+[https://jsalonl.github.io/FailOver_Mikrotik/](https://jsalonl.github.io/FailOver_Mikrotik/)
