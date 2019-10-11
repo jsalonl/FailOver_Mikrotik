@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <title>Hello, world!</title>
+  </head>
+  <body>
+    <body class="bg-light">
+    <div class="container">
+      <div class="py-5 text-center">
+        <h2>FailOver sin Scripts RouterBoard Mikrotik</h2>
+        <p class="lead">Llene los datos que se piden a continuación, el formulario le dara un código que usted debe copiar y pegar en su terminal de Mikrotik.</p>
+      </div>
+
+  <div class="row">
+    <div class="col-md-6 order-md-1">
+      <h4 class="mb-3">Datos Generales</h4>
+      <form id="code">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="firstName">Puerta de enlace 1 (Proveedor Principal)</label>
+            <input type="tel" class="form-control" id="gw1" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="firstName">Puerta de enlace 2 (Proveedor de respaldo) </label>
+            <input type="tel" class="form-control" id="gw2" required>
+          </div>
+        </div>
+        <hr class="mb-4">
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Generar código</button>
+      </form>
+    </div>
+    <div class="col-md-6 order-md-2">
+      <h4 class="mb-3">Resultado : </h4>
+      <label>Copie este código y péguelo en su terminal Mikrotik</label>
+      <div class="card">
+        <div class="card-body">
+          <pre id="result">
+
+          </pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="my-5 pt-5 text-muted text-center text-small">
+    <p class="mb-1">&copy; 2019 Salomón Nieto</p>
+  </footer>
+</div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="js/jquery-3.3.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script>
+    $('Document').ready(function(){
+      $('#code').submit(function(e){
+        e.preventDefault;
+        var gw1 = $('#gw1').val();
+        var gw2 = $('#gw2').val();
+        var html = '';
+        html += ':global Gateway1 "'+gw1+'"<br>';
+        html += ':global Gateway2 "'+gw2+'"<br>';
+        html += ':global Host1 "208.67.222.222"<br>';
+        html += ':global Host2 "208.67.220.220"<br>';
+        html += '/ip route<br>';
+        html += 'add dst-address=0.0.0.0/0 gateway=$Gateway1 distance=1 check-gateway=ping<br>';
+        html += 'add dst-address=0.0.0.0/0 gateway=$Gateway2 distance=2<br>';
+        html += '<br>';
+        html += '/ip route<br>';
+        html += 'add dst-address=$Host1 gateway=$Gateway1 scope=10<br>';
+        html += 'add dst-address=$Host2 gateway=$Gateway2 scope=10<br>';
+        html += '<br>';
+        html += '/ip route<br>';
+        html += 'add distance=1 gateway=$Host1 routing-mark=ISP1 check-gateway=ping<br>';
+        html += 'add distance=2 gateway=$Host2 routing-mark=ISP1 check-gateway=ping<br>';
+        html += '<br>';
+        html += '/ip route<br>';
+        html += 'add distance=1 gateway=$Host1 routing-mark=ISP2 check-gateway=ping<br>';
+        html += 'add distance=2 gateway=$Host2 routing-mark=ISP2 check-gateway=ping<br>';
+        html += '<br>';
+        html += '/ip route<br>';
+        html += 'add dst-address=$Host1 type=blackhole distance=20<br>';
+        html += 'add dst-address=$Host2 type=blackhole distance=20<br>';
+        $('#result').html(html);
+        return false;
+      });
+    });
+    </script>
+  </body>
+</html>
