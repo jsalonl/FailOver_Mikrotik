@@ -6,7 +6,7 @@ La siguiente aplicación permite hacer un balanceo NTH entre dos o mas canales (
 
 Vaya a la página para ingresar los datos y copiar el código resultante.
 
-[https://jsalonl.github.io/Balanceo_NTH/index.html](https://jsalonl.github.io/FailOver_Mikrotik/index.html)
+[https://jsalonl.github.io/FailOver_Mikrotik/index.html](https://jsalonl.github.io/FailOver_Mikrotik/index.html)
 
 
 
