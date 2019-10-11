@@ -8,13 +8,13 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
 
-    <title>FailOver Mikrotik</title>
+    <title>Balanceo NTH</title>
   </head>
   <body>
     <body class="bg-light">
     <div class="container">
       <div class="py-5 text-center">
-        <h2>FailOver sin Scripts RouterBoard Mikrotik</h2>
+        <h2>Balanceo NTH RouterBoard Mikrotik</h2>
         <p class="lead">Llene los datos que se piden a continuación, el formulario le dara un código que usted debe copiar y pegar en su terminal de Mikrotik.</p>
       </div>
 
@@ -23,13 +23,72 @@
       <h4 class="mb-3">Datos Generales</h4>
       <form id="code">
         <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="firstName">Puerta de enlace 1 (Proveedor Principal)</label>
-            <input type="tel" class="form-control" id="gw1" required>
+          <div class="col-md-6">
+            <p style="display:inline">Número de proveedores: </p>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="firstName">Puerta de enlace 2 (Proveedor de respaldo) </label>
-            <input type="tel" class="form-control" id="gw2" required>
+            <div class="custom-control custom-radio" style="display:inline">
+              <input id="GWS1" name="GWS" type="radio" class="custom-control-input" value="2" checked="" required="">
+              <label class="custom-control-label" for="GWS1">2</label>
+            </div>
+            <div class="custom-control custom-radio" style="display:inline">
+              <input id="GWS2" name="GWS" type="radio" class="custom-control-input" value="3" required="">
+              <label class="custom-control-label" for="GWS2">3</label>
+            </div>
+            <div class="custom-control custom-radio" style="display:inline">
+              <input id="GWS3" name="GWS" type="radio" class="custom-control-input" value="4" required="">
+              <label class="custom-control-label" for="GWS3">4</label>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="firstName">Nombre de la interfaz LOCAL</label>
+              </div>
+              <div class="col-md-6">
+                <input type="text" class="form-control" id="local" placeholder="ether5" required>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="firstName">Puerta de enlace 1 (Proveedor Principal)</label>
+              </div>
+              <div class="col-md-6">
+                <input type="tel" class="form-control" id="gw1" required>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="firstName">Puerta de enlace 2</label>
+              </div>
+              <div class="col-md-6">
+                <input type="tel" class="form-control" id="gw2">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3" id="3" style="display:none">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="firstName">Puerta de enlace 3</label>
+              </div>
+              <div class="col-md-6">
+                <input type="tel" class="form-control" id="gw3">
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 mb-3" id="4" style="display:none">
+            <div class="row">
+              <div class="col-md-6">
+                <label for="firstName">Puerta de enlace 4</label>
+              </div>
+              <div class="col-md-6">
+                <input type="tel" class="form-control" id="gw4">
+              </div>
+            </div>
           </div>
         </div>
         <hr class="mb-4">
@@ -56,39 +115,98 @@
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="js/jquery-3.3.1.slim.min.js"></script>
+    <script src="js/jquery-3.4.1.min.js"></script>
     <script src="js/popper.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script>
     $('Document').ready(function(){
+      $('input[type=radio][name=GWS]').on('change', function() {
+        GWS = $(this).val();
+        switch ($(this).val()) {
+          case '2':
+            $('#3,#4').fadeOut();
+            break;
+          case '3':
+            $('#3').fadeIn();
+            break;
+          case '4':
+            $('#3,#4').fadeIn();
+            break;
+        }
+      });
       $('#code').submit(function(e){
         e.preventDefault;
+        var GWS = $('input[type=radio][name=GWS]:checked').val();
+        var local = $('#local').val();
         var gw1 = $('#gw1').val();
         var gw2 = $('#gw2').val();
+        var gw3 = $('#gw3').val();
+        var gw4 = $('#gw4').val();
         var html = '';
-        html += ':global Gateway1 "'+gw1+'"<br>';
-        html += ':global Gateway2 "'+gw2+'"<br>';
-        html += ':global Host1 "208.67.222.222"<br>';
-        html += ':global Host2 "208.67.220.220"<br>';
-        html += '/ip route<br>';
-        html += 'add dst-address=0.0.0.0/0 gateway=$Gateway1 distance=1 check-gateway=ping<br>';
-        html += 'add dst-address=0.0.0.0/0 gateway=$Gateway2 distance=2<br>';
-        html += '<br>';
-        html += '/ip route<br>';
-        html += 'add dst-address=$Host1 gateway=$Gateway1 scope=10<br>';
-        html += 'add dst-address=$Host2 gateway=$Gateway2 scope=10<br>';
-        html += '<br>';
-        html += '/ip route<br>';
-        html += 'add distance=1 gateway=$Host1 routing-mark=ISP1 check-gateway=ping<br>';
-        html += 'add distance=2 gateway=$Host2 routing-mark=ISP1 check-gateway=ping<br>';
-        html += '<br>';
-        html += '/ip route<br>';
-        html += 'add distance=1 gateway=$Host1 routing-mark=ISP2 check-gateway=ping<br>';
-        html += 'add distance=2 gateway=$Host2 routing-mark=ISP2 check-gateway=ping<br>';
-        html += '<br>';
-        html += '/ip route<br>';
-        html += 'add dst-address=$Host1 type=blackhole distance=20<br>';
-        html += 'add dst-address=$Host2 type=blackhole distance=20<br>';
+        switch (GWS) {
+          case '2':
+            html+='#Balance de 2 Canales<br>';
+            html+=':global GW1 "'+gw1+'"<br>';
+            html+=':global GW2 "'+gw2+'"<br>';
+            html+=':global Local "'+local+'"<br>';
+            html+='<br>';
+            html+='/ip firewall mangle<br>';
+            html+='<br>';
+            html+='add chain=prerouting src-address-list=ISP1 in-interface=$Local action=mark-connection new-connection-mark=ISP1 passthrough=yes <br>';
+            html+='add chain=prerouting src-address-list=ISP1 in-interface=$Local action=mark-routing new-routing-mark=ISP1 passthrough=no<br>';
+            html+='add chain=prerouting src-address-list=ISP2 in-interface=$Local action=mark-connection new-connection-mark=ISP2 passthrough=yes <br>';
+            html+='add chain=prerouting src-address-list=ISP2 in-interface=$Local action=mark-routing new-routing-mark=ISP2 passthrough=no<br>';
+            html+='<br>';
+            html+='add chain=prerouting in-interface=$Local connection-state=new nth=2,1 action=mark-connection new-connection-mark=ISP1 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local action=add-src-to-address-list address-list=ISP1 address-list-timeout=1d connection-mark=ISP1 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local connection-mark=ISP1 action=mark-routing new-routing-mark=ISP1 passthrough=no<br>';
+            html+='<br>';
+            html+='add chain=prerouting in-interface=$Local connection-state=new nth=2,2 action=mark-connection new-connection-mark=ISP2 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local action=add-src-to-address-list address-list=ISP2 address-list-timeout=1d connection-mark=ISP2 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local connection-mark=ISP2 action=mark-routing new-routing-mark=ISP2 passthrough=no<br>';
+            html+='<br>';
+            html+='/ip route<br>';
+            html+='add dst-address=0.0.0.0/0 gateway=$GW1 scope=255 target-scope=10 routing-mark=ISP1<br>';
+            html+='add dst-address=0.0.0.0/0 gateway=$GW2 scope=255 target-scope=10 routing-mark=ISP2<br>';
+            html+='add dst-address=0.0.0.0/0 gateway=$GW1 scope=255 target-scope=10<br>';
+            break;
+          case '3':
+            html+='#Balance de 3 Canales<br>';
+            html+=':global GW1 "'+gw1+'"<br>';
+            html+=':global GW2 "'+gw2+'"<br>';
+            html+=':global GW3 "'+gw3+'"<br>';
+            html+=':global Local "'+local+'"<br>';
+            html+='<br>';
+            html+='/ip firewall mangle<br>';
+            html+='<br>';
+            html+='add chain=prerouting src-address-list=ISP1 in-interface=$Local action=mark-connection new-connection-mark=ISP1 passthrough=yes <br>';
+            html+='add chain=prerouting src-address-list=ISP1 in-interface=$Local action=mark-routing new-routing-mark=ISP1 passthrough=no<br>';
+            html+='add chain=prerouting src-address-list=ISP2 in-interface=$Local action=mark-connection new-connection-mark=ISP2 passthrough=yes <br>';
+            html+='add chain=prerouting src-address-list=ISP2 in-interface=$Local action=mark-routing new-routing-mark=ISP2 passthrough=no<br>';
+            html+='add chain=prerouting src-address-list=ISP3 in-interface=$Local action=mark-connection new-connection-mark=ISP3 passthrough=yes <br>';
+            html+='add chain=prerouting src-address-list=ISP3 in-interface=$Local action=mark-routing new-routing-mark=ISP3 passthrough=no<br>';
+            html+='<br>';
+            html+='add chain=prerouting in-interface=$Local connection-state=new nth=3,1 action=mark-connection new-connection-mark=ISP1 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local action=add-src-to-address-list address-list=ISP1 address-list-timeout=1d connection-mark=ISP1 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local connection-mark=ISP1 action=mark-routing new-routing-mark=ISP1 passthrough=no<br>';
+            html+='<br>';
+            html+='add chain=prerouting in-interface=$Local connection-state=new nth=3,2 action=mark-connection new-connection-mark=ISP2 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local action=add-src-to-address-list address-list=ISP2 address-list-timeout=1d connection-mark=ISP2 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local connection-mark=ISP2 action=mark-routing new-routing-mark=ISP2 passthrough=no<br>';
+            html+='<br>';
+            html+='add chain=prerouting in-interface=$Local connection-state=new nth=3,3 action=mark-connection new-connection-mark=ISP3 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local action=add-src-to-address-list address-list=ISP3 address-list-timeout=1d connection-mark=ISP3 passthrough=yes<br>';
+            html+='add chain=prerouting in-interface=$Local connection-mark=ISP3 action=mark-routing new-routing-mark=ISP3 passthrough=no<br>';
+            html+='<br>';
+            html+='/ip route<br>';
+            html+='add dst-address=0.0.0.0/0 gateway=$GW1 scope=255 target-scope=10 routing-mark=ISP1<br>';
+            html+='add dst-address=0.0.0.0/0 gateway=$GW2 scope=255 target-scope=10 routing-mark=ISP2<br>';
+            html+='add dst-address=0.0.0.0/0 gateway=$GW3 scope=255 target-scope=10 routing-mark=ISP3<br>';
+            html+='add dst-address=0.0.0.0/0 gateway=$GW1 scope=255 target-scope=10<br>';
+            break;
+          case '4':
+            break;
+        }
         $('#result').html(html);
         return false;
       });
